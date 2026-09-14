@@ -1,24 +1,75 @@
 <!DOCTYPE html>
-<html lang="en"
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"
-    meta name="viewport" content="width=device-width",
-    <link rel="stylesheet" href="./css/style.css">
-    <script src="./js/script.js" defer></script>
-
-    <title>Jogo Mario</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mario Plus</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="../CSS/style.css">
+    <script src="../Js/script.js" defer></script>
 </head>
 <body>
+    <main class="game-shell">
+        <section class="hud" aria-label="Informações da partida">
+            <strong>Fase <span id="stage">1</span>/5</strong>
+            <span>Pontos: <b id="score">0</b></span>
+            <span>Vidas: <b id="lives">3</b></span>
+            <span>Tempo: <b id="time">0</b>s</span>
+        </section>
+        <p id="run-status" class="run-status">Sem melhorias — escolha uma ao completar cada fase.</p>
 
-    <div class="game-board">\
+        <section class="game-board theme-1" aria-label="Jogo Mario Plus">
+            <img src="../images/clouds.png" class="clouds" alt="">
+            <div class="hills" aria-hidden="true"></div>
+            <div class="ground" aria-hidden="true"></div>
+            <div class="player mario" role="img" aria-label="Mario"></div>
+            <div class="power-status" aria-live="polite"><span id="reload">↻</span> <span id="power-label">Pronto</span></div>
+            <p id="arena-status" class="arena-status" role="status" aria-live="polite"></p>
+            <!-- Count Cannoli sprites: The Silver Zephyr. Original sheet cropped into boss-cannoli.png. -->
 
-        <img src="./images/clouds.png" class="clouds">
-        <img src="./images/mario.gif" class="mario">
-        <img src="./images/pipe.png" class="pipe">
+            <div class="overlay" id="menu">
+                <h1>Mario Plus</h1>
+                <p>Escolha seu personagem</p>
+                <div class="character-options">
+                    <button class="character selected" data-character="mario">Mario</button>
+                    <button class="character" data-character="luigi">Luigi</button>
+                </div>
+                <div class="menu-actions">
+                    <button class="primary" id="start">Nova corrida</button>
+                    <button class="secondary hidden" id="continue-saved">Continuar fase 1</button>
+                </div>
+                <small>Uma melhoria entre fases. Morreu: recomeça sem melhorias.</small>
+                <small>W: pular · A/D: mover · S: entrar no cano · P: poder · Esc: pausar</small>
+            </div>
 
+            <div class="overlay hidden" id="pause">
+                <h2>Jogo pausado</h2>
+                <small>Sair salva melhorias e vidas. Continuar retoma o começo desta fase.</small>
+                <div class="menu-actions">
+                    <button class="primary" id="resume">Continuar</button>
+                    <button class="secondary" id="exit">Sair</button>
+                </div>
+            </div>
 
+            <div class="overlay hidden" id="reward" role="dialog" aria-modal="true" aria-labelledby="reward-title">
+                <h2 id="reward-title">Escolha sua melhoria</h2>
+                <small>Vale até o fim da corrida. Cada fase concluída recupera 1 vida, até o limite.</small>
+                <div id="reward-options" class="reward-options"></div>
+                <small>Escolha com 1, 2, 3 ou clique. O jogo espera sua decisão.</small>
+                <button class="secondary" id="reward-exit">Salvar e sair</button>
+            </div>
 
-    </div>
+            <div class="overlay hidden" id="message">
+                <h2 id="message-title"></h2>
+                <p id="message-text"></p>
+                <button class="primary" id="restart">Nova corrida</button>
+            </div>
+        </section>
 
+        <section class="touch-controls" aria-label="Controles">
+            <button id="jump" aria-label="Pular">↑ Pular</button>
+            <button id="fire" aria-label="Lançar poder">🔥 Poder</button>
+        </section>
+    </main>
 </body>
 </html>
