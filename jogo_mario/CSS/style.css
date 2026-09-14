@@ -1,67 +1,425 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+:root {
+    font-family: system-ui, sans-serif;
+    color: #fff;
+    background: #101522;
 }
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+}
+
+button { font: inherit; }
+
+.game-shell {
+    width: min(100%, 960px);
+    padding: 12px;
+}
+
+.hud {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #20293d;
+    border-radius: 12px 12px 0 0;
+}
+.run-status { margin: 0; padding: 7px 12px; background: #171e30; color: #f1d59c; font-size: .78rem; }
+.reward-options { display: grid; gap: 8px; width: min(100%, 560px); }
+.upgrade-choice {
+    padding: 12px;
+    border: 1px solid #b69ad8;
+    border-radius: 8px;
+    background: #302240;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+}
+.upgrade-choice:hover, .upgrade-choice:focus-visible { background: #503360; outline: 2px solid #f1d59c; }
+#reward { overflow-y: auto; place-content: safe center; gap: 8px; padding: 12px; background: #141529f5; }
 
 .game-board {
-    width: 100%;
-    height: 500px;
-    border: 1px solid #333;
-    margin: 0 auto;
+    --sky-top: #62b7ff;
+    --sky-bottom: #d9f5ff;
     position: relative;
+    height: min(62vw, 500px);
+    min-height: 330px;
     overflow: hidden;
-    background: linear-gradient(#87CEEB, #E0F6FF);
+    background: linear-gradient(var(--sky-top), var(--sky-bottom));
+    border: 3px solid #20293d;
+    transition: background .5s;
+    contain: layout paint;
 }
 
-.pipe {
+.theme-2 {
+    background: linear-gradient(#69bff4, #d9f1ff);
+}
+.theme-3 { --sky-top: #7a4f91; --sky-bottom: #ffb56b; }
+.theme-4 { --sky-top: #303653; --sky-bottom: #a75d62; }
+.theme-5 { background: #10152d; min-height: 580px; }
+.theme-5::before {
+    content: "";
     position: absolute;
-    bottom: 0;
-    width: 80px;
-    animation: pipe-animation 2s infinite linear;
+    inset: 0 0 54px;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 18% 55%, #b856ea38, transparent 30%),
+        radial-gradient(ellipse at 82% 55%, #b856ea38, transparent 30%),
+        linear-gradient(90deg, #100d2880, transparent 25% 75%, #100d2880);
 }
-
-.mario {
-    width: 150px;
+.arena-status {
+    display: none;
     position: absolute;
-    bottom: 0;
+    z-index: 7;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid #baa07066;
+    border-radius: 4px;
+    background: #100d28df;
+    color: #f5dfb6;
+    text-align: center;
+    font-size: clamp(.7rem, 2vw, .85rem);
+    pointer-events: none;
 }
-
-.jump {
-    animation: jump 5000ms ease-out;
-}
+.theme-5 .arena-status { display: block; }
+.game-board.is-paused *, .game-board.is-paused *::before { animation-play-state: paused !important; }
 
 .clouds {
-    width: 550px;
-    animation: clouds-animation 10s infinite linear;
+    position: absolute;
+    z-index: 1;
+    width: 430px;
+    top: 25px;
+    animation: clouds 12s infinite linear;
+    opacity: .8;
+    will-change: transform;
 }
 
-@keyframes pipe-animation {
-    from {
-        right: -80px;
-    }
-    to {
-        right: 100%;
-    }
+.hills {
+    position: absolute;
+    z-index: 0;
+    left: 0;
+    bottom: 54px;
+    width: 120%;
+    height: 85px;
+    opacity: .25;
+    background: repeating-linear-gradient(135deg, transparent 0 80px, #187642 81px 145px, transparent 146px 190px);
+    will-change: transform;
 }
 
-@keyframes jump {
-    0% {
-        bottom: 0;
-    }
-    40%, 50%, 60% {
-        bottom: 180px;
-    }
-    100% {
-        bottom: 0;
-    }
+.theme-1 .hills,
+.theme-2 .hills,
+.theme-3 .hills,
+.theme-4 .hills,
+.theme-5 .hills {
+    bottom: 0;
+    width: 120%;
+    height: 100%;
+    opacity: 1;
+    background-position: bottom left;
+    background-size: auto 100%;
+    background-repeat: repeat-x;
 }
 
-@keyframes clouds-animation {
-    from {
-        right: -550px;
-    }
-    to {
-        right: 100%;
-    }
+.theme-1 .hills { background-image: url("../images/stage-desert.png"); }
+.theme-2 .hills {
+    bottom: 80px;
+    height: calc(100% - 5px);
+    background-image: url("../images/stage-castle.png");
+    background-position: center center;
+    background-size: 100% 100%;
+}
+.theme-3 .hills { background-image: url("../images/stage-forest.png"); }
+.theme-4 .hills { background-image: url("../images/stage-deadwoods.png"); }
+.theme-5 .hills { background-image: url("../images/stage-castle-interior.png"); }
+.theme-5 .clouds { display: none; }
+.theme-5 .ground {
+    border-color: #baa070;
+    background: repeating-linear-gradient(90deg, #262033 0 62px, #151020 63px 65px);
+}
+.theme-5 .platform {
+    border-color: #bba778;
+    border-top-color: #f1d59c;
+    background: repeating-linear-gradient(90deg, #51435e 0 28px, #342c42 29px 31px);
+    box-shadow: 0 4px #151020;
+}
+.theme-5 .exit-pipe:not(.locked) { filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px #ffd878); }
+
+.ground {
+    position: absolute;
+    inset: auto 0 0;
+    height: 54px;
+    background: repeating-linear-gradient(45deg, #a95022 0 14px, #d67a32 15px 28px);
+    border-top: 9px solid #53a936;
+}
+
+.theme-1 .ground { border-color: #f4c458; background: #c98224; }
+.theme-2 .ground { height: 80px; border-color: #78a94d; background: #3c672f; }
+.theme-2 .player,
+.theme-2 .enemy,
+.theme-2 .fireball { bottom: 80px; }
+.theme-3 .ground { border-color: #285f49; background: #153c35; }
+.theme-4 .ground { border-color: #5b3138; background: #27171c; }
+
+.player {
+    position: absolute;
+    z-index: 4;
+    left: 0;
+    bottom: 54px;
+    width: 72px;
+    height: 84px;
+    background-position: 0 0;
+    background-size: 576px 84px;
+    background-repeat: no-repeat;
+    transform-origin: bottom;
+    will-change: transform;
+}
+
+.player.mario { background-image: url("../images/character-mario.png"); background-size: 720px 84px; image-rendering: pixelated; }
+.player.luigi { background-image: url("../images/character-luigi.png"); background-size: 1008px 84px; image-rendering: pixelated; }
+.player.walking { animation: character-walk .4s steps(4) infinite; }
+.player.jumping { background-position-x: -360px; }
+.player.shooting { animation: character-shoot .22s steps(2) forwards; }
+.player.hit { animation: blink .12s 7; }
+.player.mario.walking { animation: mario-run .4s steps(5) infinite; }
+.player.mario.jumping { background-position-x: -432px; }
+.player.mario.shooting { animation: mario-power .22s step-end forwards; }
+.player.mario.hit { background-position-x: -648px; animation: blink .12s 7; }
+.player.luigi.walking { animation: luigi-run .6s steps(8) infinite; }
+.player.luigi.jumping { background-position-x: -648px; }
+.player.luigi.shooting { animation: luigi-power .22s step-end forwards; }
+.player.luigi.hit { background-position-x: -864px; animation: blink .12s 7; }
+.player.entering-pipe { opacity: 0; scale: .35; transition: opacity .4s, scale .4s; }
+.player.entering-castle { opacity: 0; scale: .35; transition: opacity .5s, scale .5s; }
+.player.game-over { background: url("../images/game-over.png") center / contain no-repeat; animation: none; }
+.player.luigi.game-over {
+    background: url("../images/character-luigi.png") -936px 0 / 1008px 84px no-repeat;
+    animation: none;
+}
+
+.enemy {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    bottom: 54px;
+    will-change: transform;
+}
+
+.enemy.pipe {
+    width: 52px;
+    height: 68px;
+    object-fit: fill;
+}
+
+.enemy.scenery-pipe { z-index: 2; }
+.enemy.exit-pipe { z-index: 3; filter: invert(1) hue-rotate(180deg) saturate(1.8); }
+.enemy.exit-pipe.locked { filter: grayscale(1); opacity: .55; }
+.enemy.exit-castle { z-index: 3; object-fit: contain; }
+.enemy.exit-castle.locked { filter: grayscale(1); opacity: .55; }
+
+.enemy.bully {
+    width: 48px;
+    height: 48px;
+    background: url("../images/bully-custom.png") 0 0 / 380px 125px no-repeat;
+    image-rendering: pixelated;
+    animation: bully-walk .6s steps(7) infinite;
+}
+
+.enemy.bully.dying {
+    background-position-y: -51px;
+    animation: bully-die .48s steps(7) forwards;
+}
+
+.enemy.boss {
+    width: calc(96px * var(--boss-scale));
+    height: calc(104px * var(--boss-scale));
+}
+.enemy.boss::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    margin-left: -48px;
+    width: 96px;
+    height: 104px;
+    scale: var(--boss-scale);
+    /* 8 body + 6 hat frames, cropped from Count Cannoli (The Silver Zephyr). */
+    background: url("../images/boss-cannoli.png") 0 bottom / 1344px 104px no-repeat;
+    image-rendering: pixelated;
+    transform: scaleX(var(--boss-facing, -1));
+    transform-origin: bottom;
+}
+.enemy.boss[data-phase="walk"]::before { animation: boss-walk calc(.5s / var(--boss-tempo)) steps(4) infinite; }
+.enemy.boss[data-phase="prepare-jump"]::before {
+    background-position-x: -384px;
+    transform: scaleX(var(--boss-facing, -1)) scaleY(.85);
+}
+.enemy.boss[data-phase="jump"]::before { background-position-x: -480px; }
+.enemy.boss[data-phase="prepare-shot"]::before,
+.enemy.boss[data-phase="cast"]::before { background-position-x: -576px; }
+.enemy.boss[data-phase="recover"]::before { background-position-x: -672px; }
+.enemy.boss[data-form="2"] { height: calc(48px * var(--boss-scale)); }
+.enemy.boss[data-form="2"]::before { height: 48px; }
+.enemy.boss[data-form="2"]::before { background-position-x: -768px; }
+.enemy.boss[data-form="2"][data-phase="walk"]::before { animation: boss-hat calc(.5s / var(--boss-tempo)) steps(6) infinite; }
+.enemy.boss[data-form="2"][data-phase="cast"]::before,
+.enemy.boss[data-form="2"][data-phase="prepare-shot"]::before { background-position-x: -1248px; }
+.enemy.boss[data-phase="transform"]::before { animation: boss-transform 1.4s ease-in-out; }
+.enemy.boss.hit::before { filter: brightness(1.8); }
+.enemy.boss::after { content: attr(data-hp); position: absolute; top: -34px; width: 100%; text-align: center; font-size: 12px; color: white; text-shadow: 1px 1px #000; }
+.boss-health { position: absolute; top: -18px; left: 0; width: 100%; height: 12px; }
+.boss-health::-webkit-meter-bar { background: #21182e; border: 1px solid #f1d59c; }
+.boss-health::-webkit-meter-optimum-value { background: #c46bdb; }
+.boss-health::-moz-meter-bar { background: #c46bdb; }
+.enemy.boss.dying::before { animation: none; }
+.enemy.boss.dying { opacity: 0; scale: .2; transition: opacity .5s, scale .5s; }
+.boss-shot {
+    position: absolute;
+    left: 0;
+    bottom: 54px;
+    z-index: 5;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #efd5ff;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff, #e9a4ff 20%, #8e30cf 55%, #3e1067);
+    box-shadow: 0 0 7px #ac55d8;
+    will-change: transform;
+}
+
+.platform {
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    bottom: 54px;
+    height: 18px;
+    border: 3px solid #77623e;
+    background: repeating-linear-gradient(90deg, #b49a62 0 24px, #8e754b 25px 48px);
+    will-change: transform;
+}
+
+.fireball {
+    position: absolute;
+    z-index: 5;
+    left: 0;
+    bottom: 54px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff 0 12%, #ffe156 13% 35%, #f04418 36% 70%, transparent 71%);
+    filter: drop-shadow(0 0 5px #ffdf4d);
+    will-change: transform;
+}
+
+.fireball::after {
+    content: "";
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    width: 28px;
+    height: 10px;
+    background: linear-gradient(90deg, transparent, rgb(255 105 30 / 55%));
+    border-radius: 50%;
+}
+.fireball.left::after { right: auto; left: 10px; transform: scaleX(-1); }
+
+.power-status {
+    position: absolute;
+    z-index: 6;
+    left: 10px;
+    bottom: 8px;
+    padding: 3px 8px;
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    background: rgb(20 25 35 / 70%);
+    border-radius: 12px;
+}
+
+#reload.reloading { display: inline-block; animation: reload .7s infinite linear; }
+
+.overlay {
+    position: absolute;
+    z-index: 10;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 15px;
+    padding: 24px;
+    text-align: center;
+    background: rgb(14 20 35 / 82%);
+}
+
+.overlay h1, .overlay h2, .overlay p { margin: 0; }
+.overlay h1 { font-size: clamp(2rem, 8vw, 4.5rem); text-shadow: 4px 4px #c52d22; }
+.overlay small { opacity: .8; }
+.hidden { display: none; }
+
+.character-options,
+.menu-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+.character,
+.primary,
+.secondary,
+.touch-controls button {
+    cursor: pointer;
+    color: white;
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 20px;
+    background: #35415c;
+    font-weight: 700;
+}
+
+.character.selected { outline: 3px solid #ffd84c; background: #ba3027; }
+.character[data-character="luigi"].selected { background: #24853c; }
+.primary { background: #e04836; font-size: 1.15rem; }
+.secondary { background: #35415c; }
+
+.touch-controls {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 10px;
+}
+
+.touch-controls button { min-width: 120px; touch-action: manipulation; }
+
+@keyframes clouds {
+    from { transform: translateX(960px); }
+    to { transform: translateX(-500px); }
+}
+
+@keyframes blink { 50% { opacity: .15; } }
+@keyframes reload { to { transform: rotate(1turn); } }
+@keyframes character-walk { from { background-position-x: -72px; } to { background-position-x: -360px; } }
+@keyframes mario-run { from { background-position-x: -72px; } to { background-position-x: -432px; } }
+@keyframes mario-power { 0% { background-position-x: -504px; } 50%, 100% { background-position-x: -576px; } }
+@keyframes luigi-run { from { background-position-x: -72px; } to { background-position-x: -648px; } }
+@keyframes luigi-power { 0% { background-position-x: -720px; } 50%, 100% { background-position-x: -792px; } }
+@keyframes character-shoot { from { background-position-x: -432px; } to { background-position-x: -576px; } }
+@keyframes bully-walk { to { background-position-x: -332.5px; } }
+@keyframes bully-die { to { background-position: -332.5px -51px; opacity: 0; } }
+@keyframes boss-walk { to { background-position-x: -384px; } }
+@keyframes boss-hat { from { background-position-x: -768px; } to { background-position-x: -1344px; } }
+@keyframes boss-transform {
+    50% { opacity: .3; transform: scaleX(var(--boss-facing, -1)) scale(.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .enemy.boss[data-phase="transform"]::before { animation: none; }
+}
+
+@media (min-width: 800px) {
+    .touch-controls { opacity: .65; }
+}
+
+@media (max-width: 520px) {
+    .hud { font-size: .82rem; padding-inline: 8px; }
 }
